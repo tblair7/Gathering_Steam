@@ -1,10 +1,10 @@
 import pandas as pd
 from sklearn import preprocessing
+import pickle as pckl
 
 max_abs_scaler = preprocessing.MaxAbsScaler()
-global window_move_index
 
-def window_df(df, window_days, *args):
+def window_df(df, params):
 
     upvote_window = []
     percent_window = []
@@ -13,18 +13,18 @@ def window_df(df, window_days, *args):
     #roc = [] # rate of change
     window_moving = []
 
-    window_unix = window_days * 86400
+    window_unix = params['window_days'] * 86400
 
     # set the shift for taking the derivative, 1 if none given
     try:
-        shift = args[0]
+        shift = params['shift']
     except:
         shift = 1
 
 
     for i in range(len(df)):
 
-        window_close = df['time_of_review_unix'].iloc[i]
+        window_close = int(df['time_of_review_unix'].iloc[i])
         window_start = window_close - window_unix
 
         min_index = min(df.index[df['time_of_review_unix'].between(window_start,
@@ -32,10 +32,13 @@ def window_df(df, window_days, *args):
                                                                    inclusive=True)].tolist())
 
 
-        upvotes_in_period = df['upvotes'].iloc[i] - df['upvotes'].iloc[min_index]
-        upvote_window.append(upvotes_in_period)
+        #upvotes_in_period = df['upvotes'].iloc[i] - df['upvotes'].iloc[min_index]
+        #upvote_window.append(upvotes_in_period)
 
-        if i > 0:
+        if min_index > 0:
+
+            upvotes_in_period = df['upvotes'].iloc[i] - df['upvotes'].iloc[min_index]
+            upvote_window.append(upvotes_in_period)
 
             total_votes_period = df['total_votes'].iloc[i] - df['total_votes'].iloc[min_index]
             total_window.append(total_votes_period)
@@ -47,12 +50,16 @@ def window_df(df, window_days, *args):
 
         else:
 
-            total_window.append(1)
-            percent_window.append(df['upvotes'].iloc[i]/1)
+            upvotes_in_period = df['upvotes'].iloc[i]
+            upvote_window.append(upvotes_in_period)
+
+            total_window.append(i+1)
+
+            percent_window.append(df['upvotes'].iloc[i]/(i+1))
 
             #roc.append(0)
 
-    print(len(upvote_window), len(total_window), len(percent_window))
+    #print(len(upvote_window), len(total_window), len(percent_window))
     #time_of_review_unix = df['time_of_review_unix']
     #mins_played = df['minutes_played']
 
@@ -62,7 +69,7 @@ def window_df(df, window_days, *args):
     window_df['percent_window'] = percent_window
 
     percent_window_series = window_df['percent_window']
-    roc = percent_window_series - percent_window_series.shift(shift)
+    roc = percent_window_series - percent_window_series.shift(params['shift'])
     deriv = pd.DataFrame({'deriv': roc})
     norm_deriv = max_abs_scaler.fit_transform(deriv)
 
@@ -70,6 +77,10 @@ def window_df(df, window_days, *args):
 
     full_df = window_df.fillna(value=0)
 
+    if params['save_df'] == True:
+        pckl.dump(full_df, open('{0}_{1}day_window_df.pckl'.format(params['game'], params['window_days']), 'wb'))
+    else:
+        pass
     #min_window_moving = min(window_moving)
 
 #    window_df = pd.DataFrame({'time_of_review': df['time_of_review'].tolist(),
