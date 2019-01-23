@@ -60,33 +60,48 @@ def gen_tokens(review, *args):
 
     stemmed_tokens = []
 
-    try:
-        method = args[0]
-    except:
-        method = 'lancaster'
+    #try:
+    #    method = args[0]
+    #except:
+    #    method = 'lancaster'
 
-    if method == 'lancaster':
-        for token in cleaned_tokens:
-            stemmed_tokens.append(lancaster.stem(token.lower().strip()))
+    #if method == 'lancaster':
+    #    for token in cleaned_tokens:
+    #        stemmed_tokens.append(lancaster.stem(token.lower().strip()))
 
-    elif method == 'porter':
-        for token in cleaned_tokens:
-            stemmed_tokens.append(porter.stem(token.lower().strip()))
+    #elif method == 'porter':
+    #    for token in cleaned_tokens:
+    #        stemmed_tokens.append(porter.stem(token.lower().strip()))
 
-    elif method == 'snowball':
-        for token in cleaned_tokens:
-            stemmed_tokens.append(snowball.stem(token.lower().strip()))
+    #elif method == 'snowball':
+    #    for token in cleaned_tokens:
+    #        stemmed_tokens.append(snowball.stem(token.lower().strip()))
 
-    stemmed_text = ' '.join(stemmed_tokens)
+    cleaned_text = ' '.join(cleaned_tokens)
 
-    return stemmed_text
+    return cleaned_text
 
 
 
-def clean_and_tokenize(reviews):
+def clean_and_tokenize(df, params):
+
+    reviews = df['review']
+
     cleaned_reviews = []
 
     for review in reviews:
         review_tokens = []
         cleaned_text = cleanText(review)
         cleaned_reviews.append(gen_tokens(cleaned_text))
+
+    df['tokenized_review'] = cleaned_reviews
+
+    if params['save_df'] == True:
+        import pickle as pckl
+        pckl.dump(df, open('{0}_{1}days_tokenized_df.pckl'.format(params['game'], params['window_days']), 'wb'))
+    else:
+        pass
+
+
+
+    return df
