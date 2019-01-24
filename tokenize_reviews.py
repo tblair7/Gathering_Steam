@@ -30,10 +30,10 @@ def cleanText(text):
 
     # replace the contractions with their expanded form
     for contraction, expansion in contraction_dict.items():
-        text = text.replace(contraction.lower(),expansion.lower())
+        text = text.replace(contraction,expansion) # .lower() after each if lowercase is desired
 
     # get rid of newlines
-    symbols = ['\'', '\"', '.', ',', '[', ']', '(', ')', '?', '!', '@', '$', '#', '&', '%']
+    symbols = ['\'', '\"', '.', ',', '[', ']', '(', ')', '?', '@', '$', '#', '&', '%'] # !
 
     text = text.strip().replace('\n', ' ').replace('\r', ' ').replace('-',' ')
 
@@ -41,7 +41,7 @@ def cleanText(text):
         text = text.replace(symbol, '')
 
     # lowercase
-    text = text.lower()
+    #text = text.lower()
 
     return text
 
