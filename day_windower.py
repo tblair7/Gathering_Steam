@@ -10,24 +10,24 @@ def window_df(df, params):
 
     upvote_window, percent_window, total_window = [], [], []
 
-    window_unix = params['window_days'] * 86400
+    window_unix = int(int(params['window_days']) * 86400)
 
 
 
     for i in range(len(df)):
 
         window_close = int(df['time_of_review_unix'].iloc[i])
-        window_start = window_close - window_unix
+        window_start = int(window_close - window_unix)
 
-        min_index = min(df.index[df['time_of_review_unix'].between(window_start,
+        min_index = int(min(df.index[df['time_of_review_unix'].between(window_start,
                                                                    window_close,
-                                                                   inclusive=True)].tolist())
+                                                                   inclusive=True)].tolist()))
 
 
         #upvotes_in_period = df['upvotes'].iloc[i] - df['upvotes'].iloc[min_index]
         #upvote_window.append(upvotes_in_period)
 
-        if min_index > 0:
+        if int(min_index) > 0:
 
             upvotes_in_period = df['upvotes'].iloc[i] - df['upvotes'].iloc[min_index]
             upvote_window.append(upvotes_in_period)
@@ -83,12 +83,14 @@ def window_df(df, params):
     return full_df
 
 
-def vader(df, params):
+def sent_window(df, params):
 
     #comp_sent_raw_sum, comp_sent_nostop_sum = [], []
-    comp_sent_raw_window, comp_sent_nostop_window = [], []
+    neu_window, neg_window, pos_window, comp_window = [], [], [], []
 
     window_unix = params['window_days'] * 86400
+
+    #new_df = df.copy()
 
     #comp_sent_raw = df['comp_sent_raw']
     #comp_sent_nostop = df['comp_sent_nostop']
@@ -100,11 +102,9 @@ def vader(df, params):
     for i in range(len(df)):
 
         window_close = int(df['time_of_review_unix'].iloc[i])
-        window_start = window_close - window_unix
+        window_start = int(window_close - window_unix)
 
-        min_index = min(df.index[df['time_of_review_unix'].between(window_start,
-                                                                   window_close,
-                                                                   inclusive=True)].tolist())
+        min_index = int(min(df.index[df['time_of_review_unix'].between(window_start, window_close, inclusive=True)].tolist()))
 
         #print(min_index)
 
@@ -123,33 +123,50 @@ def vader(df, params):
         #comp_sent_raw_sum.append(comp_sent_raw_period)
         #comp_sent_nostop_sum.append(comp_sent_nostop_period)
 
-        if i > 0:
+        if min_index > 0:
 
-            comp_sent_raw_period = max(df['comp_sent_raw'].iloc[min_index:i].cumsum())
-            #comp_sent_nostop_period = max(df['comp_sent_nostop'].iloc[min_index:i].cumsum())
+            #print('min index', min_index, 'i', i, max(df['neu_sent'].iloc[min_index:i].cumsum()))
 
-            comp_sent_raw_window.append(comp_sent_raw_period/current_window_size)
-            #comp_sent_nostop_window.append(comp_sent_nostop_period/current_window_size)
+            neu_period = max(df['neu_sent'].iloc[min_index:i].cumsum())
+            neg_period = max(df['neg_sent'].iloc[min_index:i].cumsum())
+            pos_period = max(df['pos_sent'].iloc[min_index:i].cumsum())
+            comp_period = max(df['comp_sent'].iloc[min_index:i].cumsum())
+
+            neu_window.append(neu_period/current_window_size)
+            neg_window.append(neg_period/current_window_size)
+            pos_window.append(pos_period/current_window_size)
+            comp_window.append(comp_period/current_window_size)
+
 
         else:
-            comp_sent_raw_window.append(df['comp_sent_raw'].iloc[0]/1)
+            neu_window.append(df['neu_sent'].iloc[0]/current_window_size)
+            neg_window.append(df['neg_sent'].iloc[0]/current_window_size)
+            pos_window.append(df['pos_sent'].iloc[0]/current_window_size)
+            comp_window.append(df['comp_sent'].iloc[0]/current_window_size)
             #comp_sent_nostop_window.append(df['comp_sent_nostop'].iloc[0]/1)
 
-    #print(comp_sent_raw_window[0:10])
+    print(type(min(df.index[df['time_of_review_unix'].between(window_start,
+                                                               window_close,
+                                                               inclusive=True)].tolist())))
 
     #print('length of window', len(comp_sent_raw_window), 'length of df', print(len(df)))
 
-    df['comp_sent_window'] = comp_sent_raw_window
+    df['neu_window'] = pd.Series(neu_window)#/max(neu_window)
+    df['neg_window'] = pd.Series(neg_window)#/max(neg_window)
+    df['pos_window'] = pd.Series(pos_window)#max(pos_window)
+    df['comp_window'] = pd.Series(comp_window)#/max(comp_window)
     #df['comp_sent_nostop_window'] = comp_sent_nostop_window
 
-    return df
+    new_df = df.copy()
+
+    return new_df
 
 
 
 
 def deriv_window(df, params, columns):
 
-    window_unix = params['window_days'] * 86400
+    window_unix = int(params['window_days'] * 86400)
 
     for column in columns:
 
@@ -161,18 +178,18 @@ def deriv_window(df, params, columns):
         for i in range(len(df)):
 
             window_close = int(df['time_of_review_unix'].iloc[i])
-            window_start = window_close - window_unix
+            window_start = int(window_close - window_unix)
 
-            min_index = min(df.index[df['time_of_review_unix'].between(window_start,
+            min_index = int(min(df.index[df['time_of_review_unix'].between(window_start,
                                                                        window_close,
-                                                                       inclusive=True)].tolist())
+                                                                       inclusive=True)].tolist()))
 
-            current_window_size = i - min_index + 1
+            current_window_size = int(i - min_index + 1)
 
 
             if i > 0:
 
-                deriv_period = max(df[column].iloc[min_index:i].cumsum())
+                deriv_period = int(max(df[column].iloc[min_index:i].cumsum()))
 
                 roc_window.append(deriv_period/current_window_size)
 
@@ -190,5 +207,114 @@ def deriv_window(df, params, columns):
         df[new_column] = norm_deriv
 
     new_df = df
+
+    return new_df
+
+
+def deriv_full_window(df, params, columns):
+
+    window_unix = params['window_days'] * 86400
+
+    new_df = df.copy()
+
+
+    for column in columns:
+
+        roc_window = []
+
+        #roc = (df[column] - df[column].shift(1)).fillna(value=0)
+
+
+        for i in range(len(df)):
+
+            window_close = int(df['time_of_review_unix'].iloc[i])
+            window_start = window_close - window_unix
+
+            min_index = min(df.index[df['time_of_review_unix'].between(window_start,
+                                                                       window_close,
+                                                                       inclusive=True)].tolist())
+
+            current_window_size = i - min_index + 1
+
+
+            if i > 0:
+
+                deriv_period = df[column].iloc[i] - df[column].iloc[min_index]
+
+                roc_window.append(deriv_period/current_window_size)
+
+            else:
+
+                deriv_period = 0
+
+                roc_window.append(deriv_period/current_window_size)
+
+        new_column = column + '_fullroc'
+
+        deriv = pd.DataFrame({'deriv': roc_window})
+        norm_deriv = preprocessing.maxabs_scale(deriv)
+
+        new_df[new_column] = norm_deriv
+
+
+    return new_df
+
+
+def delta_percent(df, days):
+
+    #window_unix = params['window_days'] * 86400
+
+    new_df = df.copy()
+
+    for day in days:
+
+        window_unix = int(day) * 86400
+
+        delta_percent = []
+
+        for i in range(len(df)):
+
+            window_close = int(df['time_of_review_unix'].iloc[i])
+            window_start = int(window_close - window_unix)
+
+            min_index = min(df.index[df['time_of_review_unix'].between(window_start,
+                                                                       window_close,
+                                                                       inclusive=True)].tolist())
+
+            if i > 0:
+
+                delta_percent.append(df['percent_window'].iloc[i] - df['percent_window'].iloc[min_index])
+
+            else:
+                delta_percent.append(0)
+
+        day_string = str(day) + 'day_delta'
+
+        new_df[day_string] = delta_percent
+
+
+    return new_df
+
+def forecast(df, days):
+
+    new_df = df.copy()
+
+    window_unix = int(days * 86400)
+
+    delta_forecast = []
+
+    for i in range(len(df)):
+        window_start = int(df['time_of_review_unix'].iloc[i])
+        window_close = int(window_start + window_unix)
+
+        max_index = max(df.index[df['time_of_review_unix'].between(window_start,
+                                                                   window_close,
+                                                                   inclusive=True)].tolist())
+
+        delta_forecast.append(df['percent_window'].iloc[max_index] - df['percent_window'].iloc[i])
+
+    day_string = str(days) + 'day_forecast'
+
+    new_df[day_string] = delta_forecast
 
     return new_df

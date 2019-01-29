@@ -7,7 +7,7 @@ from matplotlib.dates import DateFormatter
 from sklearn import preprocessing
 
 
-def plot(df, params, columns):
+def plot(df, params, columns, plot_name):
 
     years = mdates.YearLocator()
     months = mdates.MonthLocator()
@@ -15,36 +15,41 @@ def plot(df, params, columns):
 
 
 
-    date = df['time_of_review'].iloc[1000:]
+    date = df['time_of_review'].iloc[5000:]
 
-    plot_list = []
+    #plot_list = []
 
-    for column in columns:
-        plot_list.append('date, ' + df[column].iloc[1000:])
+    #for column in columns:
+    #    plot_list.append('date, ' + df[column].iloc[1000:])
 
-    plot_string = ','.join(plot_list)
+    #plot_string = ','.join(plot_list)
 
 
 
     #ax = plt.figure(figsize=(20,10))
     fig, ax = plt.subplots(figsize=(20,10))
 
-    ax.plot(plot_string)
+
+    for i in columns:
+        ax.plot(date, df[i].iloc[5000::])
+
+    #ax.plot(plot_string)
 
     ax.xaxis.set_major_locator(years)
     ax.xaxis.set_major_formatter(yearsFmt)
     ax.xaxis.set_minor_locator(months)
 
-    fig.legend(columns, loc='upper right', bbox_to_anchor=(0.8, 0.15))
+    fig.legend('1day_forecast', loc='upper right')
 
-    plt.ylabel('Normalized arb units')
-    plt.title('ARK in {0}-day Periods Over Time'.format(params['window_days']))
+    plt.ylabel('% Upvotes')
+    plt.title('ARK {0}-Day Upvotes Over Time'.format(params['window_days']))
 
     plt.show()
 
-    fig.savefig('{0}_{1}days_window_plot.png'.format(params['game'], params['window_days']))
+    fig.savefig('plots/{0}_{1}days_{2}_plot.png'.format(params['game'], params['window_days'], plot_name))
 
 #def plot_reviews_roc(df, game, window_days):
 
 #    max_abs_scaler = preprocessing.MaxAbsScaler()
 #    np_scaled = max_abs_scaler.fit_transform(c['weighted_deriv'].iloc[200:].reshape(-1,1))
+    return fig
