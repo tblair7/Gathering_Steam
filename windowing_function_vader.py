@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn import preprocessing
 import pickle as pckl
+import numpy as np
 
 max_abs_scaler = preprocessing.MaxAbsScaler()
 
@@ -113,16 +114,27 @@ def window_vader(df, params):
                                                                    window_close,
                                                                    inclusive=True)].tolist())
 
+        #print(min_index)
+
         current_window_size = i - min_index + 1
 
 
-        comp_sent_raw_period = df['comp_sent_raw'].iloc[i] - df['comp_sent_raw'].iloc[min_index]
-        comp_sent_nostop_period = df['comp_sent_nostop'].iloc[i] - df['comp_sent_nostop'].iloc[min_index]
+        #comp_sent_raw_period = df['comp_sent_raw'].iloc[i] - df['comp_sent_raw'].iloc[min_index]
+        #omp_sent_nostop_period = df['comp_sent_nostop'].iloc[i] - df['comp_sent_nostop'].iloc[min_index]
+
+        #comp_sent_raw_period = max(df['comp_sent_raw'].iloc[min_index:i].cumsum())
+        #print(comp_sent_raw_period)
+        #comp_sent_max = max(comp_sent_raw_period)
+        #print(type(comp_sent_max), comp_sent_max)
+        #comp_sent_nostop_period = max(df['comp_sent_nostop'].iloc[min_index:i].cumsum())
 
         #comp_sent_raw_sum.append(comp_sent_raw_period)
         #comp_sent_nostop_sum.append(comp_sent_nostop_period)
 
         if i > 0:
+
+            comp_sent_raw_period = max(df['comp_sent_raw'].iloc[min_index:i].cumsum())
+            comp_sent_nostop_period = max(df['comp_sent_nostop'].iloc[min_index:i].cumsum())
 
             comp_sent_raw_window.append(comp_sent_raw_period/current_window_size)
             comp_sent_nostop_window.append(comp_sent_nostop_period/current_window_size)
@@ -130,6 +142,10 @@ def window_vader(df, params):
         else:
             comp_sent_raw_window.append(df['comp_sent_raw'].iloc[0]/1)
             comp_sent_nostop_window.append(df['comp_sent_nostop'].iloc[0]/1)
+
+    #print(comp_sent_raw_window[0:10])
+
+    #print('length of window', len(comp_sent_raw_window), 'length of df', print(len(df)))
 
     df['comp_sent_raw_window'] = comp_sent_raw_window
     df['comp_sent_nostop_window'] = comp_sent_nostop_window
