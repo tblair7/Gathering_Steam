@@ -158,7 +158,8 @@ def topics(df, params, index_dictionary):
     implement_nmf = NMF(n_components=num_topics,
                         random_state=1,
                         solver='mu',
-                        beta_loss='frobenius')
+                        beta_loss='frobenius',
+                        max_iter = 500)
 
     keys, output = [], []
 

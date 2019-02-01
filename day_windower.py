@@ -27,7 +27,7 @@ def window_df(df, params):
         #upvotes_in_period = df['upvotes'].iloc[i] - df['upvotes'].iloc[min_index]
         #upvote_window.append(upvotes_in_period)
 
-        if int(min_index) > 0:
+        if i > 0:
 
             upvotes_in_period = df['upvotes'].iloc[i] - df['upvotes'].iloc[min_index]
             upvote_window.append(upvotes_in_period)
@@ -42,15 +42,15 @@ def window_df(df, params):
 
         else:
 
-            upvotes_in_period = df['upvotes'].iloc[i]
+            upvotes_in_period = df['upvotes'].iloc[0]
             upvote_window.append(upvotes_in_period)
 
             total_window.append(i+1)
 
-            percent_window.append(df['upvotes'].iloc[i]/(i+1))
+            percent_window.append(df['upvotes'].iloc[0]/1)
 
 
-    window_df = df[['time_of_review', 'review', 'upvoted', 'time_of_review_unix', 'minutes_played']].copy()
+    window_df = df[['time_of_review', 'review', 'upvoted', 'time_of_review_unix']].copy()
     window_df['upvotes_window'] = upvote_window
     window_df['total_window'] = total_window
     window_df['percent_window'] = percent_window
@@ -123,7 +123,7 @@ def sent_window(df, params):
         #comp_sent_raw_sum.append(comp_sent_raw_period)
         #comp_sent_nostop_sum.append(comp_sent_nostop_period)
 
-        if min_index > 0:
+        if i > 0:
 
             #print('min index', min_index, 'i', i, max(df['neu_sent'].iloc[min_index:i].cumsum()))
 
