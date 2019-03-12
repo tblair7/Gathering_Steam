@@ -1,2 +1,8 @@
 /steam_api_key.txt
 /old_data
+/.ipynb_checkpoints
+/plots
+*.json
+*.pckl
+*.png
+*.html
