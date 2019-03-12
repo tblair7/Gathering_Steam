@@ -151,7 +151,7 @@ def topics(df, params, index_dictionary):
     vectorizer = TfidfVectorizer(stop_words=stop_list,
                                 max_features=num_features,
                                 ngram_range=(1,3),
-                                max_df=0.7, min_df=3,
+                                max_df=0.7, min_df=2,
                                 norm = 'l2')
 
     # use NMF model with the Frobenius norm
@@ -168,9 +168,12 @@ def topics(df, params, index_dictionary):
 
     for key in keys:
 
-        working_df = df.iloc[index_dictionary[key].values].copy()
+        working_df = df.iloc[index_dictionary[key].values].copy()# [df['review'].str.len() > 15].copy()
+        #print(key, working_df['review'])
 
         reviews = working_df['review']
+
+
 
         cleaned = clean_and_tokenize(reviews)
 
